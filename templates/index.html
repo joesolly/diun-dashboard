@@ -269,6 +269,40 @@
       border-color: var(--blue);
     }
 
+    /* ── Toasts ── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 100; pointer-events: none;
+    }
+
+    .toast {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px;
+      border-radius: 6px; border: 1px solid;
+      min-width: 280px; max-width: 480px;
+      pointer-events: all;
+      animation: toast-in .2s ease;
+    }
+    .toast.err  { background: #1a0f0f; border-color: rgba(248,113,113,.4); color: var(--red); }
+    .toast.ok   { background: var(--green-dim); border-color: rgba(74,222,128,.4); color: var(--green); }
+    .toast.info { background: var(--blue-dim);  border-color: rgba(96,165,250,.4); color: var(--blue); }
+
+    .toast-msg  { flex: 1; line-height: 1.5; word-break: break-word; }
+    .toast-close {
+      background: none; border: none; cursor: pointer;
+      color: inherit; opacity: .6; font-size: 16px; padding: 0; line-height: 1;
+      flex-shrink: 0;
+    }
+    .toast-close:hover { opacity: 1; }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* ── Empty state ── */
     #empty-state {
       display: none; flex-direction: column;
@@ -308,6 +342,8 @@
   <button class="btn-clear" onclick="clearAll()">Clear all</button>
 </div>
 
+<div id="toast-container"></div>
+
 <main id="cards-container">
   <div id="empty-state">
     <div class="empty-icon">⬡</div>
@@ -317,6 +353,15 @@
 </main>
 
 <script>
+  function toast(message, type = 'err', duration = 6000) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<span class="toast-msg">${message}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+    container.appendChild(el);
+    if (duration) setTimeout(() => el.remove(), duration);
+  }
+
   let allData        = [];
   let currentFilter  = 'all';
   let portainerReady = false;
@@ -505,13 +550,10 @@
       msg.textContent = `✓ ${stackName} redeployed`;
       msg.className = 'redeploy-msg ok';
       if (btn) { btn.className = 'btn-redeploy success'; btn.textContent = '✓ Done'; btn.disabled = false; }
-      setTimeout(() => {
-        openPanels[image] = false;
-        render(allData);
-      }, 2500);
+      setTimeout(() => { openPanels[image] = false; render(allData); }, 2500);
     } catch (err) {
-      msg.textContent = `✗ ${err.message}`;
-      msg.className = 'redeploy-msg err';
+      toast(`Redeploy failed: ${err.message}`);
+      msg.textContent = '';
       if (btn) { btn.className = 'btn-redeploy error'; btn.textContent = '✗ Failed'; btn.disabled = false; }
       confirmBtn.disabled = false;
     }
@@ -551,7 +593,7 @@
       if (!res.ok) { stacksError = data.error || `HTTP ${res.status}`; stacks = []; return; }
       stacks = Array.isArray(data) ? data : [];
       stacksError = stacks.length === 0 ? 'No stacks returned by Portainer' : null;
-    } catch (e) { stacks = []; stacksError = e.message; }
+    } catch (e) { stacks = []; stacksError = e.message; toast(`Failed to load stacks: ${e.message}`); }
   }
 
   async function dismiss(image) {
@@ -571,8 +613,8 @@
 
     const matched = matchingStacks(image);
     if (!matched.length) {
-      msg.textContent = 'No matching stacks found';
-      msg.className = 'redeploy-msg err';
+      toast(`No Portainer stacks match: ${image}`);
+      if (allBtn) allBtn.disabled = false;
       return;
     }
 
@@ -594,8 +636,8 @@
       msg.className = 'redeploy-msg ok';
       setTimeout(() => dismiss(image), 2000);
     } else {
-      msg.textContent = `✗ Some stacks failed`;
-      msg.className = 'redeploy-msg err';
+      const failed = matched.filter((_, i) => !results[i]).map(s => s.name).join(', ');
+      toast(`Some stacks failed to redeploy: ${failed}`);
       if (allBtn) allBtn.disabled = false;
     }
   }
