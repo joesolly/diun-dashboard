@@ -47,6 +47,9 @@ services:
       - DIUN_NOTIF_APPRISE_ENDPOINT=http://apprise:8000
       - DIUN_NOTIF_APPRISE_TOKEN=your_apprise_tag
 
+      # --- Pushbullet ---
+      - DIUN_NOTIF_PUSHBULLET_TOKEN=your_pushbullet_token
+
       # --- Dashboard webhook ---
       - DIUN_NOTIF_WEBHOOK_ENDPOINT=http://diun-dashboard:8080/webhook
       - DIUN_NOTIF_WEBHOOK_METHOD=POST
@@ -68,8 +71,10 @@ services:
       - diun-dashboard-data:/data
     environment:
       - DB_PATH=/data/diun.db
-      - PORTAINER_URL=http://portainer:9000
+      - PORTAINER_URL=http://host.docker.internal:9000
       - PORTAINER_TOKEN=your_portainer_token
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
 volumes:
   diun-data:
@@ -86,17 +91,16 @@ configs:
             Content-Type: "application/json"
 
         apprise:
-          tmplTitle: |
-            {{- if eq .Entry.Status "new" -}}🆕{{- else -}}🔄{{- end }} {{ .Entry.Image.Name }}
-          tmplBody: |
+          templateTitle: "{{- if eq .Entry.Status \"new\" -}}🆕{{- else -}}🔄{{- end }} {{ .Entry.Image }}"
+          templateBody: |
             Status:   {{ .Entry.Status }}
-            Host:     {{ .Hostname }}
-            Platform: {{ .Entry.Image.Platform }}
+            Host:     {{ .Meta.Hostname }}
+            Platform: {{ .Entry.Platform }}
 
-            View: http://YOUR_DASHBOARD_HOST:8585/?image={{ .Entry.Image.Name }}
+            View: http://YOUR_DASHBOARD_HOST:8585/?image={{ .Entry.Image }}
 ```
 
-The `View:` URL in `tmplBody` deep-links directly to the image card in the dashboard.
+The `View:` URL in `templateBody` deep-links directly to the image card in the dashboard.
 
 ## Portainer integration
 
