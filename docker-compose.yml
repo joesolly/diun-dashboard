@@ -1,0 +1,18 @@
+services:
+  diun-dashboard:
+    image: ghcr.io/joesolly/diun-dashboard:latest
+    # To build locally instead:
+    # build: .
+    container_name: diun-dashboard
+    restart: unless-stopped
+    ports:
+      - "8585:8080"
+    volumes:
+      - diun-dashboard-data:/data
+    environment:
+      - DB_PATH=/data/diun.db
+      - PORTAINER_URL=http://portainer:9000   # adjust if needed
+      - PORTAINER_TOKEN=                       # paste your Portainer API token here
+
+volumes:
+  diun-dashboard-data:

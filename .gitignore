@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Data (never commit the live database)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIUN Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0b0e14;
+      --surface:   #111621;
+      --border:    #1e2638;
+      --muted:     #3a4460;
+      --text:      #c8d3f5;
+      --dim:       #6272a4;
+      --green:     #4ade80;
+      --green-dim: #16401e;
+      --amber:     #fbbf24;
+      --amber-dim: #3d2c00;
+      --red:       #f87171;
+      --blue:      #60a5fa;
+      --blue-dim:  #1e3a5f;
+      --purple:    #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+
+    .logo-mark {
+      width: 30px; height: 30px;
+      border: 2px solid var(--blue);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; font-weight: 600;
+      color: var(--blue); letter-spacing: -1px;
+    }
+
+    .logo-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px; font-weight: 500;
+      color: var(--text); letter-spacing: 0.04em;
+    }
+    .logo-text span { color: var(--dim); font-weight: 300; }
+
+    .header-right { display: flex; align-items: center; gap: 16px; }
+
+    .status-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 4px 10px;
+      border-radius: 3px; border: 1px solid var(--border); color: var(--dim);
+    }
+    .status-pill.live { border-color: var(--green); color: var(--green); }
+
+    #last-refresh { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--dim); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 28px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+
+    .summary-chips { display: flex; gap: 8px; flex: 1; }
+
+    .chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 5px 12px;
+      border-radius: 3px; border: 1px solid var(--border);
+      background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
+    }
+    .chip:hover { border-color: var(--muted); color: var(--text); }
+    .chip.active-all { border-color: var(--blue);  color: var(--blue);  background: rgba(96,165,250,.08); }
+    .chip.active-new { border-color: var(--green); color: var(--green); background: rgba(74,222,128,.08); }
+    .chip.active-upd { border-color: var(--amber); color: var(--amber); background: rgba(251,191,36,.08); }
+    .chip .count { margin-left: 6px; opacity: .7; }
+
+    .btn-clear {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 5px 12px;
+      border-radius: 3px; border: 1px solid var(--muted);
+      background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
+    }
+    .btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Cards ── */
+    main { padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      animation: slide-in .2s ease;
+      transition: border-color .15s;
+      overflow: hidden;
+    }
+    .card:hover { border-color: var(--muted); }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-main {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0 16px;
+      align-items: start;
+      padding: 16px 20px;
+    }
+
+    .card-status-bar {
+      width: 3px; align-self: stretch;
+      border-radius: 2px; background: var(--muted); margin-right: 4px;
+    }
+    .card-status-bar.new    { background: var(--green); }
+    .card-status-bar.update { background: var(--amber); }
+
+    .card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+    .card-image {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px; font-weight: 500;
+      color: var(--text); word-break: break-all; line-height: 1.4;
+    }
+
+    .card-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+    .meta-item {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; color: var(--dim);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .meta-item .label { color: var(--muted); }
+
+    .card-links { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+
+    .ext-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; text-decoration: none;
+      opacity: .7; transition: opacity .15s;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .ext-link:hover { opacity: 1; }
+    .ext-link.hub    { color: var(--blue); }
+    .ext-link.github { color: var(--purple); }
+
+    .card-right {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px; flex-shrink: 0;
+    }
+
+    .badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 3px;
+    }
+    .badge.new    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
+    .badge.update { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+    .badge.unknown { background: var(--border); color: var(--dim); border: 1px solid var(--muted); }
+
+    .btn-dismiss {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; padding: 3px 8px;
+      border-radius: 3px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer; transition: all .15s;
+    }
+    .btn-dismiss:hover { border-color: var(--red); color: var(--red); }
+
+    .btn-redeploy {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; padding: 3px 8px;
+      border-radius: 3px; border: 1px solid var(--blue-dim);
+      background: var(--blue-dim); color: var(--blue);
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-redeploy:hover:not(:disabled) { border-color: var(--blue); filter: brightness(1.2); }
+    .btn-redeploy:disabled { opacity: .4; cursor: default; }
+    .btn-redeploy.success { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+    .btn-redeploy.error   { border-color: var(--red);   background: transparent;      color: var(--red); }
+
+    /* ── Redeploy panel ── */
+    .redeploy-panel {
+      border-top: 1px solid var(--border);
+      background: #0d1220;
+      padding: 12px 20px 12px calc(20px + 3px + 4px + 16px); /* align with card body */
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+
+    .redeploy-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; color: var(--dim);
+    }
+
+    .stack-select {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 4px 8px;
+      border-radius: 3px; border: 1px solid var(--muted);
+      background: var(--surface); color: var(--text); cursor: pointer;
+      flex: 1; min-width: 160px; max-width: 320px;
+    }
+    .stack-select:focus { outline: none; border-color: var(--blue); }
+
+    .btn-confirm-redeploy {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 4px 12px;
+      border-radius: 3px; border: 1px solid var(--blue);
+      background: var(--blue-dim); color: var(--blue);
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .btn-confirm-redeploy:hover:not(:disabled) { filter: brightness(1.2); }
+    .btn-confirm-redeploy:disabled { opacity: .4; cursor: default; }
+
+    .btn-cancel-redeploy {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 4px 10px;
+      border-radius: 3px; border: 1px solid var(--border);
+      background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
+    }
+    .btn-cancel-redeploy:hover { color: var(--text); border-color: var(--muted); }
+
+    .redeploy-msg {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; color: var(--dim);
+    }
+    .redeploy-msg.ok  { color: var(--green); }
+    .redeploy-msg.err { color: var(--red); }
+
+    /* ── Deep-link highlight ── */
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--blue); box-shadow: 0 0 0 0 rgba(96,165,250,0); }
+      50%       { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(96,165,250,.15); }
+    }
+    .card.highlighted {
+      animation: slide-in .2s ease, pulse-border 1.4s ease 0.2s 3;
+      border-color: var(--blue);
+    }
+
+    /* ── Empty state ── */
+    #empty-state {
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; padding: 80px 0; color: var(--muted);
+    }
+    .empty-icon { font-size: 36px; opacity: .4; }
+    .empty-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
+    .empty-sub { font-size: 12px; color: var(--dim); opacity: .7; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">DI</div>
+    <div class="logo-text">DIUN <span>/ image update notifier</span></div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill live" id="conn-status">● LIVE</div>
+    <div id="last-refresh">—</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="summary-chips">
+    <button class="chip active-all" id="filter-all" onclick="setFilter('all')">
+      All <span class="count" id="count-all">0</span>
+    </button>
+    <button class="chip" id="filter-new" onclick="setFilter('new')">
+      New <span class="count" id="count-new">0</span>
+    </button>
+    <button class="chip" id="filter-update" onclick="setFilter('update')">
+      Updated <span class="count" id="count-update">0</span>
+    </button>
+  </div>
+  <button class="btn-clear" onclick="clearAll()">Clear all</button>
+</div>
+
+<main id="cards-container">
+  <div id="empty-state">
+    <div class="empty-icon">⬡</div>
+    <div class="empty-title">No notifications yet</div>
+    <div class="empty-sub">Waiting for DIUN webhook events on <code>/webhook</code></div>
+  </div>
+</main>
+
+<script>
+  let allData        = [];
+  let currentFilter  = 'all';
+  let portainerReady = false;
+  let stacks         = [];         // [{id, name, endpointId}]
+  let openPanels     = {};         // image → true/false
+  let highlightImage = new URLSearchParams(window.location.search).get('image');
+
+  // ── GitHub link inference ─────────────────────────────────────────────────
+
+  function githubLink(image) {
+    // ghcr.io/owner/repo[:tag]
+    const ghcr = image.match(/^ghcr\.io\/([^/:]+)\/([^/:]+)/);
+    if (ghcr) return `https://github.com/${ghcr[1]}/${ghcr[2]}`;
+
+    // lscr.io/linuxserver/app[:tag]  → linuxserver/docker-app
+    const lscr = image.match(/^lscr\.io\/linuxserver\/([^/:]+)/);
+    if (lscr) return `https://github.com/linuxserver/docker-${lscr[1]}`;
+
+    // hotio/app or ghcr.io/hotio/app
+    const hotio = image.match(/(?:ghcr\.io\/)?hotio\/([^/:]+)/);
+    if (hotio) return `https://github.com/hotio/${hotio[1]}`;
+
+    // cr.hotio.dev/hotio/app
+    const hotio2 = image.match(/^cr\.hotio\.dev\/hotio\/([^/:]+)/);
+    if (hotio2) return `https://github.com/hotio/${hotio2[1]}`;
+
+    return null;
+  }
+
+  // ── Stack matching ────────────────────────────────────────────────────────
+
+  function bestStack(image) {
+    if (!stacks.length) return null;
+    // Prefer exact name match, then substring
+    const imageLower = image.toLowerCase();
+    return stacks.find(s => imageLower.includes(s.name.toLowerCase()))
+        || stacks.find(s => s.name.toLowerCase().split(/[-_]/).some(w => w.length > 2 && imageLower.includes(w)))
+        || null;
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  function relTime(iso) {
+    if (!iso) return '—';
+    const diff = Date.now() - new Date(iso).getTime();
+    const s = Math.floor(diff / 1000);
+    if (s < 60)  return `${s}s ago`;
+    const m = Math.floor(s / 60);
+    if (m < 60)  return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24)  return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  }
+
+  function shortDigest(digest) {
+    return digest ? digest.replace('sha256:', '').slice(0, 12) : '';
+  }
+
+  function setFilter(f) {
+    currentFilter = f;
+    ['all','new','update'].forEach(x => {
+      document.getElementById('filter-' + x).className =
+        'chip' + (x === f ? ` active-${x === 'all' ? 'all' : x === 'new' ? 'new' : 'upd'}` : '');
+    });
+    render(allData);
+  }
+
+  function render(data) {
+    const container = document.getElementById('cards-container');
+    const empty     = document.getElementById('empty-state');
+    const filtered  = currentFilter === 'all' ? data : data.filter(e => e.status === currentFilter);
+
+    document.getElementById('count-all').textContent    = data.length;
+    document.getElementById('count-new').textContent    = data.filter(e => e.status === 'new').length;
+    document.getElementById('count-update').textContent = data.filter(e => e.status === 'update').length;
+
+    [...container.querySelectorAll('.card')].forEach(c => c.remove());
+
+    if (!filtered.length) { empty.style.display = 'flex'; return; }
+    empty.style.display = 'none';
+
+    filtered.forEach(entry => {
+      const platform   = entry.platform ? `${entry.platform.os || ''}/${entry.platform.architecture || ''}`.replace(/\/$/, '') : '';
+      const digest     = shortDigest(entry.digest);
+      const ghLink     = githubLink(entry.image);
+      const matched    = bestStack(entry.image);
+      const panelOpen  = openPanels[entry.image] || false;
+      const safeImage  = encodeURIComponent(entry.image);
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.image = entry.image;
+
+      card.innerHTML = `
+        <div class="card-main">
+          <div class="card-status-bar ${entry.status}"></div>
+          <div class="card-body">
+            <div class="card-image">${entry.image}</div>
+            <div class="card-meta">
+              ${entry.hostname ? `<span class="meta-item"><span class="label">host</span>${entry.hostname}</span>` : ''}
+              ${platform       ? `<span class="meta-item"><span class="label">platform</span>${platform}</span>` : ''}
+              ${digest         ? `<span class="meta-item"><span class="label">digest</span>${digest}…</span>` : ''}
+              <span class="meta-item"><span class="label">seen</span>${relTime(entry.last_seen)}</span>
+              ${entry.seen_count > 1 ? `<span class="meta-item"><span class="label">×</span>${entry.seen_count}</span>` : ''}
+            </div>
+            <div class="card-links">
+              ${entry.hub_link ? `<a class="ext-link hub" href="${entry.hub_link}" target="_blank" rel="noopener">↗ hub</a>` : ''}
+              ${ghLink         ? `<a class="ext-link github" href="${ghLink}" target="_blank" rel="noopener">⌥ github</a>` : ''}
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="badge ${entry.status}">${entry.status}</span>
+            ${portainerReady
+              ? `<button class="btn-redeploy" id="btn-rd-${safeImage}" onclick="togglePanel('${entry.image.replace(/'/g,"\\'")}')">↺ Redeploy</button>`
+              : ''}
+            <button class="btn-dismiss" onclick="dismiss('${entry.image.replace(/'/g,"\\'")}')">dismiss</button>
+          </div>
+        </div>
+        ${portainerReady ? `
+        <div class="redeploy-panel" id="panel-${safeImage}" style="display:${panelOpen ? 'flex' : 'none'}">
+          <span class="redeploy-label">stack:</span>
+          <select class="stack-select" id="sel-${safeImage}">
+            ${stacks.map(s =>
+              `<option value="${s.id}:${s.endpointId}" ${matched && s.id === matched.id ? 'selected' : ''}>${s.name}</option>`
+            ).join('')}
+          </select>
+          <button class="btn-confirm-redeploy" onclick="confirmRedeploy('${entry.image.replace(/'/g,"\\'")}')">↺ Pull &amp; redeploy</button>
+          <button class="btn-cancel-redeploy" onclick="togglePanel('${entry.image.replace(/'/g,"\\'")}')">cancel</button>
+          <span class="redeploy-msg" id="msg-${safeImage}"></span>
+        </div>` : ''}
+      `;
+
+      container.appendChild(card);
+
+      if (highlightImage && entry.image === highlightImage) {
+        card.classList.add('highlighted');
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+      }
+    });
+  }
+
+  // ── Redeploy panel ────────────────────────────────────────────────────────
+
+  function togglePanel(image) {
+    openPanels[image] = !openPanels[image];
+    const safeImage = encodeURIComponent(image);
+    const panel = document.getElementById(`panel-${safeImage}`);
+    if (panel) panel.style.display = openPanels[image] ? 'flex' : 'none';
+  }
+
+  async function confirmRedeploy(image) {
+    const safeImage = encodeURIComponent(image);
+    const sel       = document.getElementById(`sel-${safeImage}`);
+    const msg       = document.getElementById(`msg-${safeImage}`);
+    const btn       = document.getElementById(`btn-rd-${safeImage}`);
+    const confirmBtn = sel.parentElement.querySelector('.btn-confirm-redeploy');
+
+    if (!sel.value) { msg.textContent = 'Select a stack first'; msg.className = 'redeploy-msg err'; return; }
+
+    const [stackId, endpointId] = sel.value.split(':');
+    const stackName = sel.options[sel.selectedIndex].text;
+
+    confirmBtn.disabled = true;
+    msg.textContent = `Redeploying ${stackName}…`;
+    msg.className = 'redeploy-msg';
+    if (btn) { btn.disabled = true; btn.textContent = '↺ …'; }
+
+    try {
+      const res  = await fetch('/api/portainer/redeploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stackId: parseInt(stackId), endpointId: parseInt(endpointId) })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.statusText);
+
+      msg.textContent = `✓ ${stackName} redeployed`;
+      msg.className = 'redeploy-msg ok';
+      if (btn) { btn.className = 'btn-redeploy success'; btn.textContent = '✓ Done'; btn.disabled = false; }
+      setTimeout(() => {
+        openPanels[image] = false;
+        render(allData);
+      }, 2500);
+    } catch (err) {
+      msg.textContent = `✗ ${err.message}`;
+      msg.className = 'redeploy-msg err';
+      if (btn) { btn.className = 'btn-redeploy error'; btn.textContent = '✗ Failed'; btn.disabled = false; }
+      confirmBtn.disabled = false;
+    }
+  }
+
+  // ── Data fetching ─────────────────────────────────────────────────────────
+
+  async function fetchUpdates() {
+    try {
+      const res = await fetch('/api/updates');
+      allData   = await res.json();
+      render(allData);
+      document.getElementById('last-refresh').textContent  = 'refreshed ' + relTime(new Date().toISOString());
+      document.getElementById('conn-status').className     = 'status-pill live';
+      document.getElementById('conn-status').textContent   = '● LIVE';
+    } catch {
+      document.getElementById('conn-status').className   = 'status-pill';
+      document.getElementById('conn-status').textContent = '○ OFFLINE';
+    }
+  }
+
+  async function fetchConfig() {
+    try {
+      const res     = await fetch('/api/config');
+      const cfg     = await res.json();
+      portainerReady = cfg.portainer;
+      if (portainerReady) await fetchStacks();
+    } catch { /* Portainer stays disabled */ }
+  }
+
+  async function fetchStacks() {
+    try {
+      const res = await fetch('/api/portainer/stacks');
+      const data = await res.json();
+      stacks = Array.isArray(data) ? data : [];
+    } catch { stacks = []; }
+  }
+
+  async function dismiss(image) {
+    await fetch('/api/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image })
+    });
+    delete openPanels[image];
+    await fetchUpdates();
+  }
+
+  async function clearAll() {
+    if (!confirm('Clear all notifications?')) return;
+    await fetch('/api/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    openPanels = {};
+    await fetchUpdates();
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+
+  (async () => {
+    await fetchConfig();
+    await fetchUpdates();
+    setInterval(fetchUpdates, 15000);
+    setInterval(() => render(allData), 30000);
+  })();
+</script>
+</body>
+</html>

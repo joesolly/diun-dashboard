@@ -1,0 +1,10 @@
+.git
+.github
+.gitignore
+.dockerignore
+__pycache__
+*.pyc
+*.db
+data/
+README.md
+diun-notif.yml
