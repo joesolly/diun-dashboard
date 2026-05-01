@@ -50,7 +50,7 @@ def row_to_dict(row):
 
 # ── Portainer helper ──────────────────────────────────────────────────────────
 
-def portainer_req(method, path, body=None):
+def portainer_req(method, path, body=None, timeout=10):
     if not PORTAINER_URL or not PORTAINER_TOKEN:
         return None, "Portainer not configured (set PORTAINER_URL and PORTAINER_TOKEN)"
     url  = f"{PORTAINER_URL}/api{path}"
@@ -59,7 +59,7 @@ def portainer_req(method, path, body=None):
     req.add_header("X-API-Key", PORTAINER_TOKEN)
     req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read() or "{}"), None
     except urllib.error.HTTPError as e:
         return None, f"Portainer HTTP {e.code}: {e.read().decode()}"
@@ -164,7 +164,8 @@ def api_portainer_redeploy():
             "env":              stack.get("Env") or [],
             "prune":            False,
             "pullImage":        True,
-        }
+        },
+        timeout=300,
     )
     if err:
         return jsonify({"error": err}), 502
