@@ -15,9 +15,49 @@ A minimal web UI for [DIUN](https://crazymax.dev/diun/) (Docker Image Update Not
 
 ## Quick start
 
+Deploy DIUN and the dashboard together in one stack. The DIUN config is embedded inline so no extra files are needed on the host.
+
 ```yaml
-# docker-compose.yml
+name: diun
 services:
+  diun:
+    container_name: diun
+    image: crazymax/diun:latest
+    command: serve
+    volumes:
+      - diun-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: diun_config
+        target: /etc/diun/diun.yml
+    environment:
+      - TZ=America/New_York
+
+      # --- Watch settings ---
+      - DIUN_WATCH_WORKERS=20
+      - DIUN_WATCH_SCHEDULE=0 9 * * *
+      - DIUN_WATCH_JITTER=30s
+      - DIUN_WATCH_FIRSTCHECKNOTIF=false
+
+      # --- Docker provider ---
+      - DIUN_PROVIDERS_DOCKER=true
+      - DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT=true
+
+      # --- Apprise notifications (optional) ---
+      - DIUN_NOTIF_APPRISE_ENDPOINT=http://apprise:8000
+      - DIUN_NOTIF_APPRISE_TOKEN=your_apprise_tag
+
+      # --- Dashboard webhook ---
+      - DIUN_NOTIF_WEBHOOK_ENDPOINT=http://diun-dashboard:8080/webhook
+      - DIUN_NOTIF_WEBHOOK_METHOD=POST
+    labels:
+      - diun.enable=true
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - diun-dashboard
+
   diun-dashboard:
     image: ghcr.io/joesolly/diun-dashboard:latest
     container_name: diun-dashboard
@@ -29,37 +69,34 @@ services:
     environment:
       - DB_PATH=/data/diun.db
       - PORTAINER_URL=http://portainer:9000
-      - PORTAINER_TOKEN=your_token_here
+      - PORTAINER_TOKEN=your_portainer_token
 
 volumes:
+  diun-data:
   diun-dashboard-data:
+
+configs:
+  diun_config:
+    content: |
+      notif:
+        webhook:
+          endpoint: "http://diun-dashboard:8080/webhook"
+          method: POST
+          headers:
+            Content-Type: "application/json"
+
+        apprise:
+          tmplTitle: |
+            {{- if eq .Entry.Status "new" -}}🆕{{- else -}}🔄{{- end }} {{ .Entry.Image.Name }}
+          tmplBody: |
+            Status:   {{ .Entry.Status }}
+            Host:     {{ .Hostname }}
+            Platform: {{ .Entry.Image.Platform }}
+
+            View: http://YOUR_DASHBOARD_HOST:8585/?image={{ .Entry.Image.Name }}
 ```
 
-## DIUN configuration
-
-Add this to your `diun.yml` under the `notif:` key. Replace the URLs and tokens for your environment.
-
-```yaml
-notif:
-  webhook:
-    endpoint: "http://diun-dashboard:8585/webhook"
-    method: POST
-    headers:
-      Content-Type: "application/json"
-
-  pushbullet:
-    token: "YOUR_PUSHBULLET_TOKEN"
-    title: |
-      {{- if eq .Entry.Status "new" -}}🆕{{- else -}}🔄{{- end }} {{ .Entry.Image.Name }}
-    body: |
-      Status:   {{ .Entry.Status }}
-      Host:     {{ .Hostname }}
-      Platform: {{ .Entry.Image.Platform }}
-
-      View: http://YOUR_DASHBOARD_HOST:8585/?image={{ .Entry.Image.Name }}
-```
-
-The `View:` URL deep-links directly to the image card in the dashboard. Opening it scrolls to and highlights the relevant card.
+The `View:` URL in `tmplBody` deep-links directly to the image card in the dashboard.
 
 ## Portainer integration
 
