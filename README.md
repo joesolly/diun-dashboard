@@ -95,7 +95,7 @@ configs:
           templateBody: |
             Status:   {{ .Entry.Status }}
             Host:     {{ .Meta.Hostname }}
-            Platform: {{ .Entry.Platform }}
+            Provider: {{ .Entry.Provider }}
 
             View: http://YOUR_DASHBOARD_HOST:8585/?image={{ .Entry.Image }}
 ```
