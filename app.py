@@ -148,9 +148,19 @@ def api_portainer_redeploy():
     endpoint_id = body.get("endpointId")
     if not stack_id or not endpoint_id:
         return jsonify({"error": "stackId and endpointId are required"}), 400
+
+    stack, err = portainer_req("GET", f"/stacks/{stack_id}")
+    if err:
+        return jsonify({"error": f"Failed to fetch stack: {err}"}), 502
+
     _, err = portainer_req(
-        "POST", f"/stacks/{stack_id}/redeploy",
-        {"endpointId": endpoint_id, "pullImage": True}
+        "PUT", f"/stacks/{stack_id}?endpointId={endpoint_id}",
+        {
+            "StackFileContent": stack.get("StackFileContent", ""),
+            "env":              stack.get("Env") or [],
+            "prune":            False,
+            "pullImage":        True,
+        }
     )
     if err:
         return jsonify({"error": err}), 502
