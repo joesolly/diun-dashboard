@@ -348,13 +348,19 @@
 
   // ── Stack matching ────────────────────────────────────────────────────────
 
-  function bestStack(image) {
-    if (!stacks.length) return null;
-    // Prefer exact name match, then substring
+  function matchingStacks(image) {
+    if (!stacks.length) return [];
     const imageLower = image.toLowerCase();
-    return stacks.find(s => imageLower.includes(s.name.toLowerCase()))
-        || stacks.find(s => s.name.toLowerCase().split(/[-_]/).some(w => w.length > 2 && imageLower.includes(w)))
-        || null;
+    const exact = stacks.filter(s => imageLower.includes(s.name.toLowerCase()));
+    if (exact.length) return exact;
+    return stacks.filter(s =>
+      s.name.toLowerCase().split(/[-_]/).some(w => w.length > 2 && imageLower.includes(w))
+    );
+  }
+
+  function bestStack(image) {
+    const m = matchingStacks(image);
+    return m.length ? m[0] : null;
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -441,7 +447,7 @@
           ${stacksError
             ? `<span class="redeploy-msg err">${stacksError}</span>`
             : `<select class="stack-select" id="sel-${safeImage}">
-            ${stacks.map(s =>
+            ${(matchingStacks(entry.image).length ? matchingStacks(entry.image) : stacks).map(s =>
               `<option value="${s.id}:${s.endpointId}" ${matched && s.id === matched.id ? 'selected' : ''}>${s.name}</option>`
             ).join('')}
           </select>`}
@@ -563,10 +569,7 @@
     const allBtn    = document.getElementById(`btn-rdall-${safeImage}`);
     const msg       = document.getElementById(`msg-${safeImage}`);
 
-    const matched = stacks.filter(s =>
-      image.toLowerCase().includes(s.name.toLowerCase()) ||
-      s.name.toLowerCase().split(/[-_]/).some(w => w.length > 2 && image.toLowerCase().includes(w))
-    );
+    const matched = matchingStacks(image);
     if (!matched.length) {
       msg.textContent = 'No matching stacks found';
       msg.className = 'redeploy-msg err';
