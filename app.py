@@ -153,10 +153,14 @@ def api_portainer_redeploy():
     if err:
         return jsonify({"error": f"Failed to fetch stack: {err}"}), 502
 
+    file_data, err = portainer_req("GET", f"/stacks/{stack_id}/file")
+    if err:
+        return jsonify({"error": f"Failed to fetch stack file: {err}"}), 502
+
     _, err = portainer_req(
         "PUT", f"/stacks/{stack_id}?endpointId={endpoint_id}",
         {
-            "StackFileContent": stack.get("StackFileContent", ""),
+            "StackFileContent": file_data.get("StackFileContent", ""),
             "env":              stack.get("Env") or [],
             "prune":            False,
             "pullImage":        True,
