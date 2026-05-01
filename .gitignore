@@ -12,6 +12,7 @@ data/
 
 # Local stack config
 example-stack.yaml
+diun-notif.yml
 
 # Editor
 .DS_Store

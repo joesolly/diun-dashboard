@@ -71,7 +71,7 @@ def portainer_req(method, path, body=None):
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(force=True, silent=True) or {}
 
     image    = payload.get("image", "unknown")
     status   = payload.get("status", "unknown")
