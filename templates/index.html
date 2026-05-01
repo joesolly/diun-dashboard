@@ -30,7 +30,7 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 14px;
+      font-size: 18px;
       min-height: 100vh;
     }
 
@@ -50,18 +50,18 @@
     .logo { display: flex; align-items: center; gap: 12px; }
 
     .logo-mark {
-      width: 30px; height: 30px;
+      width: 38px; height: 38px;
       border: 2px solid var(--blue);
       border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px; font-weight: 600;
+      font-size: 16px; font-weight: 600;
       color: var(--blue); letter-spacing: -1px;
     }
 
     .logo-text {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 15px; font-weight: 500;
+      font-size: 19px; font-weight: 500;
       color: var(--text); letter-spacing: 0.04em;
     }
     .logo-text span { color: var(--dim); font-weight: 300; }
@@ -70,12 +70,12 @@
 
     .status-pill {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 4px 10px;
+      font-size: 14px; padding: 4px 10px;
       border-radius: 3px; border: 1px solid var(--border); color: var(--dim);
     }
     .status-pill.live { border-color: var(--green); color: var(--green); }
 
-    #last-refresh { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--dim); }
+    #last-refresh { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--dim); }
 
     /* ── Toolbar ── */
     .toolbar {
@@ -87,7 +87,7 @@
 
     .chip {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 5px 12px;
+      font-size: 14px; padding: 6px 14px;
       border-radius: 3px; border: 1px solid var(--border);
       background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
     }
@@ -99,7 +99,7 @@
 
     .btn-clear {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 5px 12px;
+      font-size: 14px; padding: 6px 14px;
       border-radius: 3px; border: 1px solid var(--muted);
       background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
     }
@@ -142,7 +142,7 @@
 
     .card-image {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px; font-weight: 500;
+      font-size: 17px; font-weight: 500;
       color: var(--text); word-break: break-all; line-height: 1.4;
     }
 
@@ -150,7 +150,7 @@
 
     .meta-item {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--dim);
+      font-size: 14px; color: var(--dim);
       display: flex; align-items: center; gap: 5px;
     }
     .meta-item .label { color: var(--muted); }
@@ -159,7 +159,7 @@
 
     .ext-link {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; text-decoration: none;
+      font-size: 13px; text-decoration: none;
       opacity: .7; transition: opacity .15s;
       display: flex; align-items: center; gap: 3px;
     }
@@ -174,9 +174,9 @@
 
     .badge {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; font-weight: 600;
+      font-size: 13px; font-weight: 600;
       letter-spacing: 0.08em; text-transform: uppercase;
-      padding: 3px 8px; border-radius: 3px;
+      padding: 4px 10px; border-radius: 3px;
     }
     .badge.new    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
     .badge.update { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
@@ -184,7 +184,7 @@
 
     .btn-dismiss {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; padding: 3px 8px;
+      font-size: 13px; padding: 4px 10px;
       border-radius: 3px; border: 1px solid var(--border);
       background: transparent; color: var(--muted); cursor: pointer; transition: all .15s;
     }
@@ -192,7 +192,7 @@
 
     .btn-redeploy {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; padding: 3px 8px;
+      font-size: 13px; padding: 4px 10px;
       border-radius: 3px; border: 1px solid var(--blue-dim);
       background: var(--blue-dim); color: var(--blue);
       cursor: pointer; transition: all .15s;
@@ -213,12 +213,12 @@
 
     .redeploy-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--dim);
+      font-size: 14px; color: var(--dim);
     }
 
     .stack-select {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 4px 8px;
+      font-size: 14px; padding: 5px 10px;
       border-radius: 3px; border: 1px solid var(--muted);
       background: var(--surface); color: var(--text); cursor: pointer;
       flex: 1; min-width: 160px; max-width: 320px;
@@ -227,7 +227,7 @@
 
     .btn-confirm-redeploy {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 4px 12px;
+      font-size: 14px; padding: 5px 14px;
       border-radius: 3px; border: 1px solid var(--blue);
       background: var(--blue-dim); color: var(--blue);
       cursor: pointer; transition: all .15s; white-space: nowrap;
@@ -237,7 +237,7 @@
 
     .btn-cancel-redeploy {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; padding: 4px 10px;
+      font-size: 14px; padding: 5px 12px;
       border-radius: 3px; border: 1px solid var(--border);
       background: transparent; color: var(--dim); cursor: pointer; transition: all .15s;
     }
@@ -245,7 +245,7 @@
 
     .redeploy-msg {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--dim);
+      font-size: 14px; color: var(--dim);
     }
     .redeploy-msg.ok  { color: var(--green); }
     .redeploy-msg.err { color: var(--red); }
@@ -266,9 +266,9 @@
       align-items: center; justify-content: center;
       gap: 12px; padding: 80px 0; color: var(--muted);
     }
-    .empty-icon { font-size: 36px; opacity: .4; }
-    .empty-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
-    .empty-sub { font-size: 12px; color: var(--dim); opacity: .7; }
+    .empty-icon { font-size: 48px; opacity: .4; }
+    .empty-title { font-family: 'IBM Plex Mono', monospace; font-size: 18px; }
+    .empty-sub { font-size: 15px; color: var(--dim); opacity: .7; }
   </style>
 </head>
 <body>
@@ -429,11 +429,13 @@
         ${portainerReady ? `
         <div class="redeploy-panel" id="panel-${safeImage}" style="display:${panelOpen ? 'flex' : 'none'}">
           <span class="redeploy-label">stack:</span>
-          <select class="stack-select" id="sel-${safeImage}">
+          ${stacksError
+            ? `<span class="redeploy-msg err">${stacksError}</span>`
+            : `<select class="stack-select" id="sel-${safeImage}">
             ${stacks.map(s =>
               `<option value="${s.id}:${s.endpointId}" ${matched && s.id === matched.id ? 'selected' : ''}>${s.name}</option>`
             ).join('')}
-          </select>
+          </select>`}
           <button class="btn-confirm-redeploy" onclick="confirmRedeploy('${entry.image.replace(/'/g,"\\'")}')">↺ Pull &amp; redeploy</button>
           <button class="btn-cancel-redeploy" onclick="togglePanel('${entry.image.replace(/'/g,"\\'")}')">cancel</button>
           <span class="redeploy-msg" id="msg-${safeImage}"></span>
@@ -524,12 +526,16 @@
     } catch { /* Portainer stays disabled */ }
   }
 
+  let stacksError = null;
+
   async function fetchStacks() {
     try {
-      const res = await fetch('/api/portainer/stacks');
+      const res  = await fetch('/api/portainer/stacks');
       const data = await res.json();
+      if (!res.ok) { stacksError = data.error || `HTTP ${res.status}`; stacks = []; return; }
       stacks = Array.isArray(data) ? data : [];
-    } catch { stacks = []; }
+      stacksError = stacks.length === 0 ? 'No stacks returned by Portainer' : null;
+    } catch (e) { stacks = []; stacksError = e.message; }
   }
 
   async function dismiss(image) {

@@ -135,7 +135,7 @@ def api_portainer_stacks():
     if err:
         return jsonify({"error": err}), 502
     stacks = [
-        {"id": s["Id"], "name": s["Name"], "endpointId": s["EndpointId"]}
+        {"id": s["Id"], "name": s["Name"], "endpointId": s.get("EndpointId") or s.get("EndpointID", 0)}
         for s in (data or [])
     ]
     return jsonify(stacks)
