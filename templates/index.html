@@ -97,6 +97,15 @@
     .chip.active-upd { border-color: var(--amber); color: var(--amber); background: rgba(251,191,36,.08); }
     .chip .count { margin-left: 6px; opacity: .7; }
 
+    .btn-redeploy-all {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; padding: 6px 14px;
+      border-radius: 3px; border: 1px solid var(--blue);
+      background: var(--blue-dim); color: var(--blue); cursor: pointer; transition: all .15s;
+    }
+    .btn-redeploy-all:hover:not(:disabled) { filter: brightness(1.2); }
+    .btn-redeploy-all:disabled { opacity: .4; cursor: default; }
+
     .btn-clear {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 14px; padding: 6px 14px;
@@ -436,7 +445,8 @@
               `<option value="${s.id}:${s.endpointId}" ${matched && s.id === matched.id ? 'selected' : ''}>${s.name}</option>`
             ).join('')}
           </select>`}
-          <button class="btn-confirm-redeploy" onclick="confirmRedeploy('${entry.image.replace(/'/g,"\\'")}')">↺ Pull &amp; redeploy</button>
+          <button class="btn-confirm-redeploy" onclick="confirmRedeploy('${entry.image.replace(/'/g,"\\'")}')">↺ Redeploy selected</button>
+          <button class="btn-confirm-redeploy" id="btn-rdall-${safeImage}" onclick="redeployAllForImage('${entry.image.replace(/'/g,"\\'")}')">↺ Redeploy all matching</button>
           <button class="btn-cancel-redeploy" onclick="togglePanel('${entry.image.replace(/'/g,"\\'")}')">cancel</button>
           <span class="redeploy-msg" id="msg-${safeImage}"></span>
         </div>` : ''}
@@ -546,6 +556,45 @@
     });
     delete openPanels[image];
     await fetchUpdates();
+  }
+
+  async function redeployAllForImage(image) {
+    const safeImage = encodeURIComponent(image);
+    const allBtn    = document.getElementById(`btn-rdall-${safeImage}`);
+    const msg       = document.getElementById(`msg-${safeImage}`);
+
+    const matched = stacks.filter(s =>
+      image.toLowerCase().includes(s.name.toLowerCase()) ||
+      s.name.toLowerCase().split(/[-_]/).some(w => w.length > 2 && image.toLowerCase().includes(w))
+    );
+    if (!matched.length) {
+      msg.textContent = 'No matching stacks found';
+      msg.className = 'redeploy-msg err';
+      return;
+    }
+
+    if (allBtn) allBtn.disabled = true;
+    msg.textContent = `Redeploying ${matched.length} stack(s)…`;
+    msg.className = 'redeploy-msg';
+
+    const results = await Promise.all(matched.map(async s => {
+      const res = await fetch('/api/portainer/redeploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stackId: s.id, endpointId: s.endpointId })
+      });
+      return res.ok;
+    }));
+
+    if (results.every(Boolean)) {
+      msg.textContent = `✓ ${matched.length} stack(s) redeployed`;
+      msg.className = 'redeploy-msg ok';
+      setTimeout(() => dismiss(image), 2000);
+    } else {
+      msg.textContent = `✗ Some stacks failed`;
+      msg.className = 'redeploy-msg err';
+      if (allBtn) allBtn.disabled = false;
+    }
   }
 
   async function clearAll() {
